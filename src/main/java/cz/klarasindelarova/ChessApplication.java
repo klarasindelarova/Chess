@@ -6,10 +6,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 
@@ -17,25 +17,47 @@ public class ChessApplication extends Application {
 
     public void start(Stage stage) {
         BorderPane layout = new BorderPane();
+        HBox horizontalLayout = new HBox();
         VBox rightTextFields = new VBox();
         Label turn = new Label("Turn: ");
-        TextArea moves = new TextArea();
+        Text moves = new Text();
         GridPane board = new GridPane();
-        Label[][] fields = new Label[8][8];
+        Label[] fields = new Label[64];
+        ChessEngine engine = new ChessEngine();
+        engine.initialSetup();
 
-        moves.appendText("vez na c3");
+        moves.setText("vez na c3");
         createFields(board, fields);
-        setPiecesToInitialPosition(fields);
+        setPiecesToBoard(engine, fields);
+
+        /* fields[1][0].setOnMouseClicked((event) -> {
+            if (fields[1][0].getText().equals("o")) {
+                if (fields[2][0].getText().equals("") && fields[3][0].getText().equals("")) {
+                    InnerShadow innerShadow = new InnerShadow();
+                    innerShadow.setOffsetX(0);
+                    innerShadow.setOffsetY(0);
+                    innerShadow.setRadius(15);
+                    innerShadow.setChoke(0);
+                    innerShadow.setColor(Color.GREEN);
+                    fields[2][0].setEffect(innerShadow);
+                    fields[3][0].setEffect(innerShadow);
+                }
+            }
+        }); */
+
 
         rightTextFields.getChildren().addAll(turn, moves);
-        rightTextFields.setSpacing(10);
+        rightTextFields.setSpacing(20);
 
-        layout.setCenter(board);
-        layout.setRight(rightTextFields);
+        horizontalLayout.getChildren().addAll(board, rightTextFields);
+        horizontalLayout.setSpacing(30);
 
-        Scene scene = new Scene(layout);
+        layout.setTop(horizontalLayout);
+
+        Scene scene = new Scene(layout, 850, 560);
         stage.setTitle("Chess");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
 
     }
@@ -44,7 +66,7 @@ public class ChessApplication extends Application {
         launch(ChessApplication.class);
     }
 
-    public void createFields(GridPane pane, Label[][] fieldsArray) {
+    public void createFields(GridPane pane, Label[] fieldsArray) {
         boolean isBlack = true;
         for (int row = 0; row < 8; row++) {
             isBlack = !isBlack;
@@ -53,43 +75,34 @@ public class ChessApplication extends Application {
                 field.setMinSize(70, 70);
                 field.setMaxSize(70, 70);
                 if (isBlack) {
-                    field.setBackground(new Background(new BackgroundFill(Color.web("#008000"), CornerRadii.EMPTY, Insets.EMPTY)));
+                    field.setBackground(new Background(new BackgroundFill(Color.web("#8B4513"), CornerRadii.EMPTY, Insets.EMPTY)));
                 } else {
-                    field.setBackground(new Background(new BackgroundFill(Color.web("#FFFFE0"), CornerRadii.EMPTY, Insets.EMPTY)));
+                    field.setBackground(new Background(new BackgroundFill(Color.web("#CD853F"), CornerRadii.EMPTY, Insets.EMPTY)));
                 }
                 pane.add(field, column, row);
                 Font chessFont = Font.loadFont(getClass().getResourceAsStream("/fonts/chess-7.ttf"), 55);
                 field.setFont(chessFont);
                 field.setAlignment(Pos.CENTER);
-                fieldsArray[row][column] = field;
+                fieldsArray[(8 * row) + column] = field;
                 isBlack = !isBlack;
             }
         }
     }
 
-    public void setPiecesToInitialPosition(Label[][] fields) {
-        fields[0][0].setText("t");
-        fields[0][1].setText("m");
-        fields[0][2].setText("v");
-        fields[0][3].setText("w");
-        fields[0][4].setText("l");
-        fields[0][5].setText("v");
-        fields[0][6].setText("m");
-        fields[0][7].setText("t");
-        for (int i = 0; i < fields[1].length; i++) {
-            fields[1][i].setText("o");
+    public void setPiecesToBoard(ChessEngine engine, Label[] fields) {
+        for (int index = 0; index < fields.length; index++) {
+            if (engine.getPieceAtIndex(index) == null) {
+                continue;
+            } else {
+                fields[index].setText(engine.getPieceAtIndex(index).getName());
+            }
+            if (engine.getPieceAtIndex(index).getColour().equals("black")) {
+                fields[index].setStyle("-fx-text-fill: #000000;");
+            } else {
+                fields[index].setStyle("-fx-text-fill: #F5F5F5;");
+            }
         }
-        fields[7][0].setText("r");
-        fields[7][1].setText("n");
-        fields[7][2].setText("b");
-        fields[7][3].setText("q");
-        fields[7][4].setText("k");
-        fields[7][5].setText("b");
-        fields[7][6].setText("n");
-        fields[7][7].setText("r");
-        for (int i = 0; i < fields[6].length; i++) {
-            fields[6][i].setText("p");
-        }
+
     }
 
 }
