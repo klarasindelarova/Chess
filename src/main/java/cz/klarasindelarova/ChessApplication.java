@@ -6,11 +6,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.effect.InnerShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.util.List;
 
 
 public class ChessApplication extends Application {
@@ -30,21 +33,23 @@ public class ChessApplication extends Application {
         createFields(board, fields);
         setPiecesToBoard(engine, fields);
 
-        /* fields[1][0].setOnMouseClicked((event) -> {
-            if (fields[1][0].getText().equals("o")) {
-                if (fields[2][0].getText().equals("") && fields[3][0].getText().equals("")) {
-                    InnerShadow innerShadow = new InnerShadow();
-                    innerShadow.setOffsetX(0);
-                    innerShadow.setOffsetY(0);
-                    innerShadow.setRadius(15);
-                    innerShadow.setChoke(0);
-                    innerShadow.setColor(Color.GREEN);
-                    fields[2][0].setEffect(innerShadow);
-                    fields[3][0].setEffect(innerShadow);
+        for (int i = 0; i < 64; i++) {
+            final int finalI = i;
+            fields[i].setOnMouseClicked((event) -> {
+                for (int field = 0; field < 64; field++) {
+                    fields[field].setEffect(null);
+                    fields[field].setDisable(true);
+                    fields[field].setOpacity(1);
                 }
-            }
-        }); */
-
+                if (engine.isPlayable(finalI)) {
+                    List<Integer> possibleFields = engine.getPossibleMoves(finalI);
+                    highlightFields(possibleFields, fields);
+                }
+                for (int field = 0; field < 64; field++) {
+                    fields[field].setDisable(false);
+                }
+            });
+        }
 
         rightTextFields.getChildren().addAll(turn, moves);
         rightTextFields.setSpacing(20);
@@ -103,6 +108,18 @@ public class ChessApplication extends Application {
             }
         }
 
+    }
+
+    public void highlightFields(List<Integer> fieldsToHighlight, Label[] fields) {
+        for (int index = 0; index < fieldsToHighlight.size(); index++) {
+            InnerShadow innerShadow = new InnerShadow();
+            innerShadow.setOffsetX(0);
+            innerShadow.setOffsetY(0);
+            innerShadow.setRadius(15);
+            innerShadow.setChoke(0);
+            innerShadow.setColor(Color.GREEN);
+            fields[fieldsToHighlight.get(index)].setEffect(innerShadow);
+        }
     }
 
 }

@@ -1,5 +1,7 @@
 package cz.klarasindelarova;
 
+import java.util.List;
+
 public class ChessEngine {
 
     private Piece[] fields;
@@ -44,5 +46,29 @@ public class ChessEngine {
         this.fields[62] = new Knight("white");
         this.fields[63] = new Rook("white");
     }
+
+    public List<Integer> getPossibleMoves(int index) {
+        Piece clickedPiece = getPieceAtIndex(index);
+        return clickedPiece.givePossibleMoves(this, index);
+    }
+
+    public boolean isPlayable(int index) {
+        if (this.fields[index] == null) {
+            return false;
+        }
+        return true;
+    }
+
+    /* public Piece[][] turnBoardIntoMultidimensionalArray() {
+        Piece[][] multidimensionalFields = new Piece[8][8];
+        int index = 0;
+        for (int row = 0; row < multidimensionalFields.length; row++) {
+            for (int column = 0; column < multidimensionalFields.length; column++) {
+                multidimensionalFields[row][column] = this.fields[index];
+                index = index + 1;
+            }
+        }
+        return multidimensionalFields;
+    } */
 
 }

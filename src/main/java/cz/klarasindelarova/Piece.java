@@ -1,6 +1,8 @@
 package cz.klarasindelarova;
 
 
+import java.util.*;
+
 public abstract class Piece {
 
     protected String name;
@@ -18,5 +20,6 @@ public abstract class Piece {
         return this.colour;
     }
 
+    public abstract List<Integer> givePossibleMoves(ChessEngine engine, int index);
 
 }
