@@ -62,12 +62,17 @@ public class Knight extends Piece{
     }
 
     public void checkFiguresAroundAndAddMovesToList(ChessEngine engine, List<Integer> possibleMoves, int rowOfFutureMove, int columnOfFutureMove) {
-        if (!(engine.isPlayable(8*rowOfFutureMove + columnOfFutureMove))) {
-            possibleMoves.add(8*rowOfFutureMove + columnOfFutureMove);
+        if (!(engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+            possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
         } else {
-            if (!(engine.getPieceAtIndex(8*rowOfFutureMove + columnOfFutureMove).getColour().equals(this.colour))) {
-                possibleMoves.add(8*rowOfFutureMove + columnOfFutureMove);
+            if (!(engine.getPieceAtIndex(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour))) {
+                possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
             }
         }
     }
+
+    public int getIndexFromRowAndColumn(int row, int column) {
+        return 8 * row + column;
+    }
+
 }
