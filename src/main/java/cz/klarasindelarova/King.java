@@ -15,55 +15,25 @@ public class King extends Piece {
         List<Integer> possibleMoves = new ArrayList<>();
         int rowOfPiece = index / 8;
         int columnOfPiece = index % 8;
+        int[][] directions = {
+                {0, -1},
+                {0, +1},
+                {-1, 0},
+                {+1, 0},
+                {-1, -1},
+                {-1, +1},
+                {+1, -1},
+                {+1, +1}
+        };
 
-        int rowOfFutureMove = rowOfPiece + 1;
-        int columnOfFutureMove = columnOfPiece;
-        if (rowOfFutureMove < 8) {
-            checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
+        for (int[] direction : directions) {
+            int rowOfFutureMove = rowOfPiece + direction[0];
+            int columnOfFutureMove = columnOfPiece + direction[1];
+
+            if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
+                checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
+            }
         }
-        rowOfFutureMove = rowOfPiece - 1;
-        columnOfFutureMove = columnOfPiece;
-
-        if (rowOfFutureMove > -1) {
-            checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
-        }
-
-        rowOfFutureMove = rowOfPiece;
-        columnOfFutureMove = columnOfPiece + 1;
-        if (columnOfFutureMove < 8) {
-            checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
-        }
-
-        rowOfFutureMove = rowOfPiece;
-        columnOfFutureMove = columnOfPiece - 1;
-        if (columnOfFutureMove > -1) {
-            checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
-        }
-
-        rowOfFutureMove = rowOfPiece + 1;
-        columnOfFutureMove = columnOfPiece + 1;
-        if (rowOfFutureMove < 8 && columnOfFutureMove < 8) {
-            checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
-        }
-
-        rowOfFutureMove = rowOfPiece + 1;
-        columnOfFutureMove = columnOfPiece - 1;
-        if (rowOfFutureMove < 8 && columnOfFutureMove > -1) {
-            checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
-        }
-
-        rowOfFutureMove = rowOfPiece - 1;
-        columnOfFutureMove = columnOfPiece - 1;
-        if (rowOfFutureMove > -1 && columnOfFutureMove > -1) {
-            checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
-        }
-
-        rowOfFutureMove = rowOfPiece - 1;
-        columnOfFutureMove = columnOfPiece + 1;
-        if (rowOfFutureMove > -1 && columnOfFutureMove < 8) {
-            checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
-        }
-
         return possibleMoves;
     }
 
@@ -71,17 +41,5 @@ public class King extends Piece {
         return false;
     }
 
-    public void checkFiguresAroundAndAddMovesToList(ChessEngine engine, List<Integer> possibleMoves, int rowOfFutureMove, int columnOfFutureMove) {
-        if (!(engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
-            possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
-        } else {
-            if (!(engine.getPieceAtIndex(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour))) {
-                possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
-            }
-        }
-    }
 
-    public int getIndexFromRowAndColumn(int row, int column) {
-        return 8 * row + column;
-    }
 }

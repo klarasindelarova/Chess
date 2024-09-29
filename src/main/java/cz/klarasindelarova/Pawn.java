@@ -16,14 +16,27 @@ public class Pawn extends Piece {
         List<Integer> possibleMoves = new ArrayList<>();
         int rowOfPiece = index / 8;
         int columnOfPiece = index % 8;
+        int[][] directionsBlack = {
+                {+1, +1},
+                {+1, -1},
+                {+1, 0}
+        };
+        int[][] directionsWhite = {
+                {-1, +1},
+                {-1, -1},
+                {-1, 0}
+        };
 
-        int rowOfFutureMove = 0;
-        int columnOfFutureMove = 0;
+        int rowOfFutureMove = rowOfPiece;
+        int columnOfFutureMove = columnOfPiece;
+
 
         if (this.colour.equals("black")) {
             if (rowOfPiece == 6) {      //figurka muze v pristim tahu ziskat jednu z vyhozenych figurek
                 // vratit zpet vyhozenou figurku
             } else if (rowOfPiece == 1) {      // figurka je v pocatecnim postaveni
+
+
                 rowOfFutureMove = rowOfPiece + 1;
                 columnOfFutureMove = columnOfPiece + 1;
                 if (isPossibleToTakePieceInNextMove(engine, rowOfFutureMove, columnOfFutureMove)) {
@@ -43,7 +56,15 @@ public class Pawn extends Piece {
                     }
                 }
             } else {                    // figurka je v jakekoli pozici krome pocatecni a na predposlednim radku
-                rowOfFutureMove = rowOfPiece + 1;
+                for (int[] direction : directionsBlack) {
+                    rowOfFutureMove = rowOfFutureMove + direction[0];
+                    columnOfFutureMove = columnOfFutureMove + direction[1];
+                    if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
+                        checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
+                    }
+                }
+
+              /*  rowOfFutureMove = rowOfPiece + 1;
                 columnOfFutureMove = columnOfPiece + 1;
                 if (isPossibleToTakePieceInNextMove(engine, rowOfFutureMove, columnOfFutureMove)) {
                     possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
@@ -56,8 +77,9 @@ public class Pawn extends Piece {
                 columnOfFutureMove = columnOfPiece;
                 if (!(engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)) && rowOfFutureMove < 7)) {
                     possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
-                }
+                } */
             }
+
         } else {           // figurka je bila
             if (rowOfPiece == 1) {      //figurka muze v pristim tahu ziskat jednu z vyhozenych figurek
                 // vratit zpet vyhozenou figurku
@@ -81,28 +103,18 @@ public class Pawn extends Piece {
                     }
                 }
             } else {
-                rowOfFutureMove = rowOfPiece - 1;
-                columnOfFutureMove = columnOfPiece + 1;
-                if (isPossibleToTakePieceInNextMove(engine, rowOfFutureMove, columnOfFutureMove)) {
-                    possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
-                }
-                columnOfFutureMove = columnOfPiece - 1;
-                if (isPossibleToTakePieceInNextMove(engine, rowOfFutureMove, columnOfFutureMove)) {
-                    possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
-                }
-                rowOfFutureMove = rowOfPiece - 1;
-                columnOfFutureMove = columnOfPiece;
-                if (!(engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
-                    possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
+                for (int[] direction : directionsWhite) {
+                    rowOfFutureMove = rowOfFutureMove + direction[0];
+                    columnOfFutureMove = columnOfFutureMove + direction[1];
+                    if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
+                        checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
+                    }
                 }
             }
         }
         return possibleMoves;
     }
 
-    public int getIndexFromRowAndColumn(int row, int column) {
-        return 8 * row + column;
-    }
 
     public boolean isPossibleToTakePieceInNextMove(ChessEngine engine, int rowOfFutureMove, int columnOfFutureMove) {
         if (engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove))) {
@@ -112,5 +124,6 @@ public class Pawn extends Piece {
         }
         return false;
     }
+
 
 }
