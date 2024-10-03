@@ -1,13 +1,52 @@
 package cz.klarasindelarova;
 
+import javafx.scene.control.Label;
+import javafx.scene.effect.InnerShadow;
+import javafx.scene.paint.Color;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChessEngine {
 
     private Piece[] fields;
+    private int indexOfClickedField;
+    private int indexOfLastClickedField;
+    private Label[] fieldOfLabels;
 
     public ChessEngine() {
         this.fields = new Piece[64];
+    }
+
+    public void inspectMove() {
+        if (fieldOfLabels[indexOfClickedField].getEffect() == null) {
+            eraseHighlightAndDisable(fieldOfLabels);
+            if (isPlayable(indexOfClickedField)) {
+                this.indexOfLastClickedField = indexOfClickedField;
+                List<Integer> possibleFields = getPossibleMoves(indexOfClickedField);
+                highlightFields(possibleFields, fieldOfLabels);
+                setFieldsActive(fieldOfLabels);
+
+            } else {
+                eraseHighlightAndDisable(fieldOfLabels);
+                setFieldsActive(fieldOfLabels);
+            }
+
+        } else {
+            eraseHighlightAndDisable(fieldOfLabels);
+            movePiece(indexOfLastClickedField, indexOfClickedField);
+            setPiecesToBoard(this, fieldOfLabels);
+            setFieldsActive(fieldOfLabels);
+        }
+
+    }
+
+    public void setFieldOfLabels(Label[] fieldOfLabels) {
+        this.fieldOfLabels = fieldOfLabels;
+    }
+
+    public void setIndexOfClickedField(int indexOfClickedField) {
+        this.indexOfClickedField = indexOfClickedField;
     }
 
     public Piece[] getAllFields() {
@@ -49,6 +88,9 @@ public class ChessEngine {
 
     public List<Integer> getPossibleMoves(int index) {
         Piece clickedPiece = getPieceAtIndex(index);
+        if (clickedPiece == null) {
+            return new ArrayList<>();
+        }
         return clickedPiece.givePossibleMoves(this, index);
     }
 
@@ -59,16 +101,59 @@ public class ChessEngine {
         return true;
     }
 
-    /* public Piece[][] turnBoardIntoMultidimensionalArray() {
-        Piece[][] multidimensionalFields = new Piece[8][8];
-        int index = 0;
-        for (int row = 0; row < multidimensionalFields.length; row++) {
-            for (int column = 0; column < multidimensionalFields.length; column++) {
-                multidimensionalFields[row][column] = this.fields[index];
-                index = index + 1;
-            }
+    public void movePiece(int currentIndex, int newIndex) {
+        Piece piece = getPieceAtIndex(currentIndex);
+        List<Integer> possibleMoves = getPossibleMoves(currentIndex);
+        if (possibleMoves.contains(newIndex)) {
+            setPieceAtIndex(piece, newIndex);
+            setPieceAtIndex(null, currentIndex);
         }
-        return multidimensionalFields;
-    } */
+    }
+
+    public void highlightFields(List<Integer> fieldsToHighlight, Label[] fields) {
+        for (int index = 0; index < fieldsToHighlight.size(); index++) {
+            InnerShadow innerShadow = new InnerShadow();
+            innerShadow.setOffsetX(0);
+            innerShadow.setOffsetY(0);
+            innerShadow.setRadius(15);
+            innerShadow.setChoke(0);
+            innerShadow.setColor(Color.GREEN);
+            fields[fieldsToHighlight.get(index)].setEffect(innerShadow);
+        }
+    }
+
+    public void setPiecesToBoard(ChessEngine engine, Label[] fields) {
+        for (int field = 0; field < 64; field++) {
+            fields[field].setEffect(null);
+        }
+        for (int index = 0; index < 64; index++) {
+            if (engine.getPieceAtIndex(index) == null) {
+                fields[index].setText("");
+            } else {
+                fields[index].setText(engine.getPieceAtIndex(index).getName());
+
+                if (engine.getPieceAtIndex(index).getColour().equals("black")) {
+                    fields[index].setStyle("-fx-text-fill: #000000;");
+                } else {
+                    fields[index].setStyle("-fx-text-fill: #F5F5F5;");
+                }
+            }
+
+        }
+    }
+
+    public void eraseHighlightAndDisable(Label[] fields) {
+        for (int field = 0; field < 64; field++) {
+            fields[field].setEffect(null);
+            fields[field].setDisable(true);
+            fields[field].setOpacity(1);
+        }
+    }
+
+    public void setFieldsActive(Label[] fields) {
+        for (int field = 0; field < 64; field++) {
+            fields[field].setDisable(false);
+        }
+    }
 
 }

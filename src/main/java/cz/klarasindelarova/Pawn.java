@@ -17,14 +17,15 @@ public class Pawn extends Piece {
         int rowOfPiece = index / 8;
         int columnOfPiece = index % 8;
         int[][] directionsBlack = {
+                {+1, 0},
                 {+1, +1},
-                {+1, -1},
-                {+1, 0}
+                {+1, -1}
         };
         int[][] directionsWhite = {
+                {-1, 0},
                 {-1, +1},
-                {-1, -1},
-                {-1, 0}
+                {-1, -1}
+
         };
 
         int rowOfFutureMove = rowOfPiece;
@@ -32,11 +33,11 @@ public class Pawn extends Piece {
 
 
         if (this.colour.equals("black")) {
-            if (rowOfPiece == 6) {      //figurka muze v pristim tahu ziskat jednu z vyhozenych figurek
+            if (rowOfPiece == 6) {     //figurka muze v pristim tahu ziskat jednu z vyhozenych figurek
+                giveMovesForAnyPositionExceptFirstRow(engine, directionsBlack, rowOfPiece, columnOfPiece, rowOfFutureMove,
+                        columnOfFutureMove, possibleMoves);
                 // vratit zpet vyhozenou figurku
             } else if (rowOfPiece == 1) {      // figurka je v pocatecnim postaveni
-
-
                 rowOfFutureMove = rowOfPiece + 1;
                 columnOfFutureMove = columnOfPiece + 1;
                 if (isPossibleToTakePieceInNextMove(engine, rowOfFutureMove, columnOfFutureMove)) {
@@ -56,32 +57,14 @@ public class Pawn extends Piece {
                     }
                 }
             } else {                    // figurka je v jakekoli pozici krome pocatecni a na predposlednim radku
-                for (int[] direction : directionsBlack) {
-                    rowOfFutureMove = rowOfFutureMove + direction[0];
-                    columnOfFutureMove = columnOfFutureMove + direction[1];
-                    if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
-                        checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
-                    }
-                }
-
-              /*  rowOfFutureMove = rowOfPiece + 1;
-                columnOfFutureMove = columnOfPiece + 1;
-                if (isPossibleToTakePieceInNextMove(engine, rowOfFutureMove, columnOfFutureMove)) {
-                    possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
-                }
-                columnOfFutureMove = columnOfPiece - 1;
-                if (isPossibleToTakePieceInNextMove(engine, rowOfFutureMove, columnOfFutureMove)) {
-                    possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
-                }
-                rowOfFutureMove = rowOfPiece + 1;
-                columnOfFutureMove = columnOfPiece;
-                if (!(engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)) && rowOfFutureMove < 7)) {
-                    possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
-                } */
+                giveMovesForAnyPositionExceptFirstRow(engine, directionsBlack, rowOfPiece, columnOfPiece,
+                        rowOfFutureMove, columnOfFutureMove, possibleMoves);
             }
 
         } else {           // figurka je bila
             if (rowOfPiece == 1) {      //figurka muze v pristim tahu ziskat jednu z vyhozenych figurek
+                giveMovesForAnyPositionExceptFirstRow(engine, directionsWhite, rowOfPiece, columnOfPiece, rowOfFutureMove,
+                        columnOfFutureMove, possibleMoves);
                 // vratit zpet vyhozenou figurku
             } else if (rowOfPiece == 6) {   // figurka je v pocatecnim postaveni
                 rowOfFutureMove = rowOfPiece - 1;
@@ -103,13 +86,8 @@ public class Pawn extends Piece {
                     }
                 }
             } else {
-                for (int[] direction : directionsWhite) {
-                    rowOfFutureMove = rowOfFutureMove + direction[0];
-                    columnOfFutureMove = columnOfFutureMove + direction[1];
-                    if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
-                        checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
-                    }
-                }
+                giveMovesForAnyPositionExceptFirstRow(engine, directionsWhite, rowOfPiece, columnOfPiece,
+                        rowOfFutureMove, columnOfFutureMove, possibleMoves);
             }
         }
         return possibleMoves;
@@ -117,13 +95,38 @@ public class Pawn extends Piece {
 
 
     public boolean isPossibleToTakePieceInNextMove(ChessEngine engine, int rowOfFutureMove, int columnOfFutureMove) {
-        if (engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove))) {
-            if (!(engine.getPieceAtIndex(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour)) && columnOfFutureMove < 8) {
-                return true;
+        if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
+            if (engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove))) {
+                if (!(engine.getPieceAtIndex(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour)) &&
+                        columnOfFutureMove < 8) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
+    public void giveMovesForAnyPositionExceptFirstRow(ChessEngine engine, int[][] directions, int RoP, int CoP,
+                                                      int rowOfFutureMove, int columnOfFutureMove, List<Integer> possMoves ) {
+        boolean firstRound = true;
+        for (int[] direction : directions) {
+            rowOfFutureMove = RoP + direction[0];
+            columnOfFutureMove = CoP + direction[1];
+            if (firstRound) {
+                if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
+                    if (!(engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                        possMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
+                    }
+                }
+                firstRound = false;
+            } else {
+                if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
+                    if (isPossibleToTakePieceInNextMove(engine, rowOfFutureMove, columnOfFutureMove)) {
+                        possMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
+                    }
+                }
 
+            }
+        }
+    }
 }
