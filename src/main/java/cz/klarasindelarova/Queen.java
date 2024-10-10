@@ -3,7 +3,7 @@ package cz.klarasindelarova;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Queen extends Piece{
+public class Queen extends Piece {
 
     public Queen(String colour) {
         super(colour);
@@ -11,10 +11,10 @@ public class Queen extends Piece{
     }
 
     @Override
-    public List<Integer> givePossibleMoves(ChessEngine engine, int index) {
+    public List<Integer> givePossibleMoves(ChessEngine engine, Piece[] pieces, int index) {
         List<Integer> possibleMoves = new ArrayList<>();
         int rowOfPiece = index / 8;
-        int columnOfPiece = index%8;
+        int columnOfPiece = index % 8;
         int[][] directions = {
                 {0, +1},
                 {0, -1},
@@ -35,10 +35,10 @@ public class Queen extends Piece{
                 if (!(isInBounds(rowOfFutureMove, columnOfFutureMove))) {
                     break;
                 }
-                if (!(engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                if (!(engine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
                     possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                 } else {
-                    if (!(engine.getPieceAtIndex(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour))) {
+                    if (!(engine.getPieceAtIndex(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour))) {
                         possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                         break;
                     } else {
@@ -49,5 +49,6 @@ public class Queen extends Piece{
         }
         return possibleMoves;
     }
+
 }
 

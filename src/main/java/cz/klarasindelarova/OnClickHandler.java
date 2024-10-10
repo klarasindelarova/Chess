@@ -16,7 +16,6 @@ public class OnClickHandler implements EventHandler<MouseEvent> {
 
     @Override
     public void handle(MouseEvent event) {
-       // System.out.println("Clicked");
         engine.setIndexOfClickedField(index);
         engine.inspectMove();
 

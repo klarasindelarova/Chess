@@ -1,6 +1,7 @@
 package cz.klarasindelarova;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 
 import javafx.geometry.Pos;
@@ -11,31 +12,51 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class ChessApplication extends Application {
 
     private ChessEngine engine;
+    private Label currentPlayer;
+    private Logger logger = LogManager.getLogger(ChessApplication.class);
 
     public void start(Stage stage) {
+
+        logger.info("Hello World");
+
+        this.engine = new ChessEngine();
+        this.currentPlayer = new Label("WHITE");
         BorderPane layout = new BorderPane();
         HBox horizontalLayout = new HBox();
         VBox rightTextFields = new VBox();
-        Label turn = new Label("Turn: ");
+        Label turnTitle = new Label("Turn: ");
         Text moves = new Text();
         GridPane board = new GridPane();
         Label[] fields = new Label[64];
         moves.setText("vez na c3");
 
-        this.engine = new ChessEngine();
+
         engine.initialSetup();
         createFields(board, fields, engine);
         setPiecesToBoard(engine, fields);
 
-        engine.setFieldOfLabels(fields);
+        engine.setArrayOfLabels(fields);
+        engine.setMoveCallback(() -> {
+            Platform.runLater(() -> {
+                currentPlayer.setText(engine.getCurrentPlayer());
+            });
+        });
+
+        for (int i = 0; i < 16; i++) {
+            fields[i].setEffect(null);
+            fields[i].setDisable(true);
+            fields[i].setOpacity(1);
+        }
 
 
-        rightTextFields.getChildren().addAll(turn, moves);
+        rightTextFields.getChildren().addAll(turnTitle, this.currentPlayer, moves);
         rightTextFields.setSpacing(20);
 
         horizontalLayout.getChildren().addAll(board, rightTextFields);
@@ -53,6 +74,7 @@ public class ChessApplication extends Application {
 
     public static void main(String[] args) {
         launch(ChessApplication.class);
+
     }
 
     public void createFields(GridPane pane, Label[] fieldsArray, ChessEngine engine) {
@@ -85,12 +107,12 @@ public class ChessApplication extends Application {
             fields[field].setEffect(null);
         }
         for (int index = 0; index < fields.length; index++) {
-            if (engine.getPieceAtIndex(index) == null) {
+            if (engine.getPieceAtIndex(engine.getPieces(), index) == null) {
                 fields[index].setText("");
             } else {
-                fields[index].setText(engine.getPieceAtIndex(index).getName());
+                fields[index].setText(engine.getPieceAtIndex(engine. getPieces(), index).getName());
 
-                if (engine.getPieceAtIndex(index).getColour().equals("black")) {
+                if (engine.getPieceAtIndex(engine.getPieces(), index).getColour().equals("BLACK")) {
                     fields[index].setStyle("-fx-text-fill: #000000;");
                 } else {
                     fields[index].setStyle("-fx-text-fill: #F5F5F5;");

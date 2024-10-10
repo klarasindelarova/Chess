@@ -11,7 +11,7 @@ public class Rook extends Piece {
     }
 
     @Override
-    public List<Integer> givePossibleMoves(ChessEngine engine, int index) {
+    public List<Integer> givePossibleMoves(ChessEngine engine, Piece[] pieces, int index) {
         List<Integer> possibleMoves = new ArrayList<>();
         int rowOfPiece = index / 8;
         int columnOfPiece = index % 8;
@@ -31,10 +31,10 @@ public class Rook extends Piece {
                 if (!(isInBounds(rowOfFutureMove, columnOfFutureMove))) {
                     break;
                 }
-                if (!(engine.isPlayable(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                if (!(engine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
                     possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                 } else {
-                    if (!(engine.getPieceAtIndex(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour))) {
+                    if (!(engine.getPieceAtIndex(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour))) {
                         possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                         break;
                     } else {

@@ -5,13 +5,15 @@ import java.util.List;
 
 public class King extends Piece {
 
+    private ChessEngine engine;
+
     public King(String colour) {
         super(colour);
         super.name = "l";
     }
 
     @Override
-    public List<Integer> givePossibleMoves(ChessEngine engine, int index) {
+    public List<Integer> givePossibleMoves(ChessEngine engine, Piece[] pieces, int index) {
         List<Integer> possibleMoves = new ArrayList<>();
         int rowOfPiece = index / 8;
         int columnOfPiece = index % 8;
@@ -31,15 +33,11 @@ public class King extends Piece {
             int columnOfFutureMove = columnOfPiece + direction[1];
 
             if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
-                checkFiguresAroundAndAddMovesToList(engine, possibleMoves, rowOfFutureMove, columnOfFutureMove);
+                checkFiguresAroundAndAddMovesToList(engine, pieces, possibleMoves, rowOfFutureMove, columnOfFutureMove);
             }
         }
+
         return possibleMoves;
     }
-
-    public boolean isInCheck() {
-        return false;
-    }
-
 
 }
