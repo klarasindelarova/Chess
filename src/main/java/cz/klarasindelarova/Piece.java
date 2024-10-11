@@ -7,9 +7,12 @@ public abstract class Piece {
 
     protected String name;
     protected String colour;
+    protected String notation;
 
-    public Piece(String colour) {
+    public Piece(String name, String colour, String notation) {
+        this.name = name;
         this.colour = colour;
+        this.notation = notation;
     }
 
     public String getName() {
@@ -18,6 +21,10 @@ public abstract class Piece {
 
     public String getColour() {
         return this.colour;
+    }
+
+    public String getNotation() {
+        return notation;
     }
 
     public abstract List<Integer> givePossibleMoves(ChessEngine engine, Piece[] pieces, int index);

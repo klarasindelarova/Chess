@@ -8,8 +8,7 @@ public class King extends Piece {
     private ChessEngine engine;
 
     public King(String colour) {
-        super(colour);
-        super.name = "l";
+        super("l", colour, "K");
     }
 
     @Override

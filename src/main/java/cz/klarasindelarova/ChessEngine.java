@@ -3,10 +3,12 @@ package cz.klarasindelarova;
 import javafx.scene.control.Label;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 
 public class ChessEngine {
@@ -20,11 +22,14 @@ public class ChessEngine {
     private MoveCallback moveCallback;
     private List<Integer> highlightedFields;
     private Logger logger = LogManager.getLogger(ChessEngine.class);
+    private Text recordOfGame;
+    private int numberOfRound;
 
     public ChessEngine() {
         this.pieces = new Piece[64];
         this.copyOfPieces = new Piece[64];
         this.isWhiteTurn = true;
+        this.numberOfRound = 0;
 
     }
 
@@ -41,9 +46,9 @@ public class ChessEngine {
         if (arrayOfLabels[indexOfClickedField].getEffect() == null) {
             eraseHighlightAndDisable(arrayOfLabels);
             if (isPlayable(this.pieces, indexOfClickedField)) {
-                this.indexOfLastClickedField = indexOfClickedField;
                 List<Integer> possibleFields = getPossibleMoves(this.pieces, indexOfClickedField);
                 inspectIfMoveCausesCheck(possibleFields);
+                this.indexOfLastClickedField = indexOfClickedField;
                 highlightFields(possibleFields, arrayOfLabels);
                 highlightedFields = possibleFields;
                 moveCallback.onMove();
@@ -59,11 +64,18 @@ public class ChessEngine {
             eraseHighlightAndDisable(arrayOfLabels);
             movePiece(this.pieces, indexOfLastClickedField, indexOfClickedField);
             setPiecesToBoard(this, arrayOfLabels);
+            if (isWhiteTurn) {
+                this.numberOfRound = numberOfRound + 1;
+                recordOfGame.setText(recordOfGame.getText() + numberOfRound + ". " + "  " + getPieceAtIndex(this.pieces, indexOfClickedField).getNotation() +
+                        getColumnFromIndex(this.pieces, indexOfClickedField) + getRowFromIndex(this.pieces, indexOfClickedField) + "   ");
+            } else {
+                recordOfGame.setText(recordOfGame.getText() + getPieceAtIndex(this.pieces, indexOfClickedField).getNotation() +
+                        getColumnFromIndex(this.pieces, indexOfClickedField) + getRowFromIndex(this.pieces, indexOfClickedField) + "\r\n");
+            }
             this.changeTurn();
             moveCallback.onMove();
             setFieldsActive(arrayOfLabels, isWhiteTurn);
         }
-
     }
 
     public void setArrayOfLabels(Label[] arrayOfLabels) {
@@ -72,6 +84,14 @@ public class ChessEngine {
 
     public void setIndexOfClickedField(int indexOfClickedField) {
         this.indexOfClickedField = indexOfClickedField;
+    }
+
+    public Text getRecordOfGame() {
+        return this.recordOfGame;
+    }
+
+    public void setRecordOfGame(Text text) {
+        this.recordOfGame = text;
     }
 
     public Piece[] getPieces() {
@@ -93,6 +113,13 @@ public class ChessEngine {
             return "WHITE";
         }
         return "BLACK";
+    }
+
+    public String getOpponentPlayer() {
+        if (isWhiteTurn) {
+            return "BLACK";
+        }
+        return "WHITE";
     }
 
     public void changeTurn() {
@@ -140,18 +167,6 @@ public class ChessEngine {
         return clickedPiece.givePossibleMoves(this, pieces, index);
     }
 
- /*   public List<Integer> getPossibleMoves(int index) {
-        Piece clickedPiece = this.pieces[index];
-        if (clickedPiece == null) {
-            return new ArrayList<>();
-        }
-        return clickedPiece.givePossibleMoves(this, index);
-    }
-
-    public boolean isPlayable(int index) {
-        return this.pieces[index] != null;
-    } */
-
     public boolean isPlayable(Piece[] pieces, int index) {
         return pieces[index] != null;
     }
@@ -159,7 +174,7 @@ public class ChessEngine {
     public void movePiece(Piece[] pieces, int currentIndex, int newIndex) {
         Piece piece = getPieceAtIndex(pieces, currentIndex);
         setPieceAtIndex(pieces, piece, newIndex);
-        setPieceAtIndex(pieces,null, currentIndex);
+        setPieceAtIndex(pieces, null, currentIndex);
 
     }
 
@@ -266,7 +281,19 @@ public class ChessEngine {
                 Piece formerPiece = this.copyOfPieces[possibleMovesOfClickedPiece.get(move)];
                 this.copyOfPieces[indexOfClickedField] = null;
                 this.copyOfPieces[possibleMovesOfClickedPiece.get(move)] = clickedPiece;
-                for (int i = 0; i < 64; i++) {
+                if (clickedPiece.getName().equals("o")) {
+                    if (isKingInCheck(this.copyOfPieces, "WHITE", "BLACK")) {
+                        isMoveOk = false;
+                    } else {
+                        isMoveOk = true;
+                    }
+                } else {
+                    if (isKingInCheck(this.copyOfPieces, "WHITE", "BLACK")) {
+                        isMoveOk = false;
+                    }
+                }
+
+             /*   for (int i = 0; i < 64; i++) {
                     Piece inspectedPiece = this.copyOfPieces[i];
                     if (inspectedPiece == null) {
                         continue;
@@ -278,7 +305,8 @@ public class ChessEngine {
                             break;
                         }
                     }
-                }
+                } */
+
                 if (isMoveOk) {
                     possibleFutureMoves.add(possibleMovesOfClickedPiece.get(move));
                 }
@@ -290,7 +318,20 @@ public class ChessEngine {
                 Piece formerPiece = this.copyOfPieces[possibleMovesOfClickedPiece.get(move)];
                 this.copyOfPieces[indexOfClickedField] = null;
                 this.copyOfPieces[possibleMovesOfClickedPiece.get(move)] = clickedPiece;
-                for (int i = 0; i < 64; i++) {
+                if (clickedPiece.getName().equals("o")) {
+                    if (isKingInCheck(this.copyOfPieces, "BLACK", "WHITE")) {
+                        isMoveOk = false;
+                    } else {
+                        isMoveOk = true;
+                    }
+                } else {
+                    if (isKingInCheck(this.copyOfPieces, "BLACK", "WHITE")) {
+                        isMoveOk = false;
+                    }
+                }
+
+
+            /*     for (int i = 0; i < 64; i++) {
                     Piece inspectedPiece = this.copyOfPieces[i];
                     if (inspectedPiece == null) {
                         continue;
@@ -302,7 +343,8 @@ public class ChessEngine {
                             break;
                         }
                     }
-                }
+                } */
+
                 if (isMoveOk) {
                     possibleFutureMoves.add(possibleMovesOfClickedPiece.get(move));
                 }
@@ -314,5 +356,55 @@ public class ChessEngine {
         possibleMovesOfClickedPiece.addAll(possibleFutureMoves);
     }
 
+    public boolean isKingInCheck(Piece[] pieces, String colour, String opponentColour) {
+        for (int i = 0; i < 64; i++) {
+            Piece inspectedPiece = pieces[i];
+            if (inspectedPiece == null) {
+                continue;
+            }
+            if (inspectedPiece.getColour().equals(opponentColour)) {
+                List<Integer> possibleMoves = getPossibleMoves(pieces, i);
+                if (possibleMoves.contains(getCurrentIndexOfKing(pieces, colour))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public String getNotationOfMove() {
+
+        return "s";
+    }
+
+    public String getRowFromIndex(Piece[] pieces, int index) {
+        int row = index / 8;
+        return switch (row) {
+            case 0 -> "8";
+            case 1 -> "7";
+            case 2 -> "6";
+            case 3 -> "5";
+            case 4 -> "4";
+            case 5 -> "3";
+            case 6 -> "2";
+            case 7 -> "1";
+            default -> "Invalid row";
+        };
+    }
+
+    public String getColumnFromIndex(Piece[] pieces, int index) {
+        int column = index % 8;
+        return switch (column) {
+            case 0 -> "a";
+            case 1 -> "b";
+            case 2 -> "c";
+            case 3 -> "d";
+            case 4 -> "e";
+            case 5 -> "f";
+            case 6 -> "g";
+            case 7 -> "h";
+            default -> "Invalid column";
+        };
+    }
 
 }

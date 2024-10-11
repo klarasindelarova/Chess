@@ -32,11 +32,10 @@ public class ChessApplication extends Application {
         HBox horizontalLayout = new HBox();
         VBox rightTextFields = new VBox();
         Label turnTitle = new Label("Turn: ");
-        Text moves = new Text();
+        Text notation = new Text();
+        engine.setRecordOfGame(notation);
         GridPane board = new GridPane();
         Label[] fields = new Label[64];
-        moves.setText("vez na c3");
-
 
         engine.initialSetup();
         createFields(board, fields, engine);
@@ -56,7 +55,7 @@ public class ChessApplication extends Application {
         }
 
 
-        rightTextFields.getChildren().addAll(turnTitle, this.currentPlayer, moves);
+        rightTextFields.getChildren().addAll(turnTitle, this.currentPlayer, notation);
         rightTextFields.setSpacing(20);
 
         horizontalLayout.getChildren().addAll(board, rightTextFields);

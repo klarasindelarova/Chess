@@ -6,8 +6,7 @@ import java.util.List;
 public class Rook extends Piece {
 
     public Rook(String colour) {
-        super(colour);
-        super.name = "t";
+        super("t", colour, "R");
     }
 
     @Override

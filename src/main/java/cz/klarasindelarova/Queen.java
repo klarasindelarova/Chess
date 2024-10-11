@@ -6,8 +6,7 @@ import java.util.List;
 public class Queen extends Piece {
 
     public Queen(String colour) {
-        super(colour);
-        super.name = "w";
+        super("w", colour, "Q");
     }
 
     @Override

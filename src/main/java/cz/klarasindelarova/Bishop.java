@@ -6,8 +6,7 @@ import java.util.List;
 public class Bishop extends Piece {
 
     public Bishop(String colour) {
-        super(colour);
-        super.name = "v";
+        super("v", colour, "B");
     }
 
     @Override
