@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
 
 public class ChessEngine {
@@ -30,7 +29,6 @@ public class ChessEngine {
         this.copyOfPieces = new Piece[64];
         this.isWhiteTurn = true;
         this.numberOfRound = 0;
-
     }
 
     public interface MoveCallback {
@@ -47,7 +45,7 @@ public class ChessEngine {
             eraseHighlightAndDisable(arrayOfLabels);
             if (isPlayable(this.pieces, indexOfClickedField)) {
                 List<Integer> possibleFields = getPossibleMoves(this.pieces, indexOfClickedField);
-                inspectIfMoveCausesCheck(possibleFields);
+                inspectIfMoveCausesCheck(this.pieces[indexOfClickedField], possibleFields);
                 this.indexOfLastClickedField = indexOfClickedField;
                 highlightFields(possibleFields, arrayOfLabels);
                 highlightedFields = possibleFields;
@@ -64,17 +62,14 @@ public class ChessEngine {
             eraseHighlightAndDisable(arrayOfLabels);
             movePiece(this.pieces, indexOfLastClickedField, indexOfClickedField);
             setPiecesToBoard(this, arrayOfLabels);
-            if (isWhiteTurn) {
-                this.numberOfRound = numberOfRound + 1;
-                recordOfGame.setText(recordOfGame.getText() + numberOfRound + ". " + "  " + getPieceAtIndex(this.pieces, indexOfClickedField).getNotation() +
-                        getColumnFromIndex(this.pieces, indexOfClickedField) + getRowFromIndex(this.pieces, indexOfClickedField) + "   ");
+            addRecordOfMoveToNotation();
+            if (isCheckMate(this.pieces)) {
+                eraseHighlightAndDisable(this.arrayOfLabels);
             } else {
-                recordOfGame.setText(recordOfGame.getText() + getPieceAtIndex(this.pieces, indexOfClickedField).getNotation() +
-                        getColumnFromIndex(this.pieces, indexOfClickedField) + getRowFromIndex(this.pieces, indexOfClickedField) + "\r\n");
+                this.changeTurn();
+                moveCallback.onMove();
+                setFieldsActive(arrayOfLabels, isWhiteTurn);
             }
-            this.changeTurn();
-            moveCallback.onMove();
-            setFieldsActive(arrayOfLabels, isWhiteTurn);
         }
     }
 
@@ -224,19 +219,19 @@ public class ChessEngine {
         List<Integer> occupiedFields;
 
         if (isWhiteTurn) {
-            occupiedFields = getOpponentOccupiedFields("BLACK");
+            occupiedFields = getOpponentOccupiedFields(this.pieces, getOpponentPlayer());
         } else {
-            occupiedFields = getOpponentOccupiedFields("WHITE");
+            occupiedFields = getOpponentOccupiedFields(this.pieces, getOpponentPlayer());
         }
         disableLabelsWithOpponentPieces(occupiedFields);
 
     }
 
-    public List<Integer> getOpponentOccupiedFields(String colour) {
+    public List<Integer> getOpponentOccupiedFields(Piece[] pieces, String colour) {
         List<Integer> occupiedFields = new ArrayList<>();
         for (int i = 0; i < 64; i++) {
-            if (isPlayable(this.pieces, i)) {
-                if (this.pieces[i].getColour().equals(colour)) {
+            if (isPlayable(pieces, i)) {
+                if (pieces[i].getColour().equals(colour)) {
                     occupiedFields.add(i);
                 }
             }
@@ -271,87 +266,32 @@ public class ChessEngine {
         throw new IllegalStateException("No field with king found.");
     }
 
-    public void inspectIfMoveCausesCheck(List<Integer> possibleMovesOfClickedPiece) {
+    public void inspectIfMoveCausesCheck(Piece clickedPiece, List<Integer> possibleMovesOfClickedPiece) {
         setCopyOfPieces(pieces);
-        Piece clickedPiece = this.copyOfPieces[indexOfClickedField];
         List<Integer> possibleFutureMoves = new ArrayList<>();
         boolean isMoveOk = true;
-        if (isWhiteTurn) {
-            for (int move = 0; move < possibleMovesOfClickedPiece.size(); move++) {
-                Piece formerPiece = this.copyOfPieces[possibleMovesOfClickedPiece.get(move)];
-                this.copyOfPieces[indexOfClickedField] = null;
-                this.copyOfPieces[possibleMovesOfClickedPiece.get(move)] = clickedPiece;
-                if (clickedPiece.getName().equals("o")) {
-                    if (isKingInCheck(this.copyOfPieces, "WHITE", "BLACK")) {
-                        isMoveOk = false;
-                    } else {
-                        isMoveOk = true;
-                    }
+        for (int move = 0; move < possibleMovesOfClickedPiece.size(); move++) {
+            Piece formerPiece = this.copyOfPieces[possibleMovesOfClickedPiece.get(move)];
+            this.copyOfPieces[indexOfClickedField] = null;
+            this.copyOfPieces[possibleMovesOfClickedPiece.get(move)] = clickedPiece;
+            if (clickedPiece.getName().equals("o")) {
+                if (isKingInCheck(this.copyOfPieces, getCurrentPlayer(), getOpponentPlayer())) {
+                    isMoveOk = false;
                 } else {
-                    if (isKingInCheck(this.copyOfPieces, "WHITE", "BLACK")) {
-                        isMoveOk = false;
-                    }
+                    isMoveOk = true;
                 }
-
-             /*   for (int i = 0; i < 64; i++) {
-                    Piece inspectedPiece = this.copyOfPieces[i];
-                    if (inspectedPiece == null) {
-                        continue;
-                    }
-                    if (inspectedPiece.getColour().equals("BLACK")) {
-                        List<Integer> possibleMoves = getPossibleMoves(this.copyOfPieces, i);
-                        if (possibleMoves.contains(getCurrentIndexOfKing(this.copyOfPieces, "WHITE"))) {
-                            isMoveOk = false;
-                            break;
-                        }
-                    }
-                } */
-
-                if (isMoveOk) {
-                    possibleFutureMoves.add(possibleMovesOfClickedPiece.get(move));
+            } else {
+                if (isKingInCheck(this.copyOfPieces, getCurrentPlayer(), getOpponentPlayer())) {
+                    isMoveOk = false;
                 }
-                this.copyOfPieces[indexOfClickedField] = clickedPiece;
-                this.copyOfPieces[possibleMovesOfClickedPiece.get(move)] = formerPiece;
             }
-        } else {
-            for (int move = 0; move < possibleMovesOfClickedPiece.size(); move++) {
-                Piece formerPiece = this.copyOfPieces[possibleMovesOfClickedPiece.get(move)];
-                this.copyOfPieces[indexOfClickedField] = null;
-                this.copyOfPieces[possibleMovesOfClickedPiece.get(move)] = clickedPiece;
-                if (clickedPiece.getName().equals("o")) {
-                    if (isKingInCheck(this.copyOfPieces, "BLACK", "WHITE")) {
-                        isMoveOk = false;
-                    } else {
-                        isMoveOk = true;
-                    }
-                } else {
-                    if (isKingInCheck(this.copyOfPieces, "BLACK", "WHITE")) {
-                        isMoveOk = false;
-                    }
-                }
-
-
-            /*     for (int i = 0; i < 64; i++) {
-                    Piece inspectedPiece = this.copyOfPieces[i];
-                    if (inspectedPiece == null) {
-                        continue;
-                    }
-                    if (inspectedPiece.getColour().equals("WHITE")) {
-                        List<Integer> possibleMoves = getPossibleMoves(this.copyOfPieces, i);
-                        if (possibleMoves.contains(getCurrentIndexOfKing(this.copyOfPieces, "BLACK"))) {
-                            isMoveOk = false;
-                            break;
-                        }
-                    }
-                } */
-
-                if (isMoveOk) {
-                    possibleFutureMoves.add(possibleMovesOfClickedPiece.get(move));
-                }
-                this.copyOfPieces[indexOfClickedField] = clickedPiece;
-                this.copyOfPieces[possibleMovesOfClickedPiece.get(move)] = formerPiece;
+            if (isMoveOk) {
+                possibleFutureMoves.add(possibleMovesOfClickedPiece.get(move));
             }
+            this.copyOfPieces[indexOfClickedField] = clickedPiece;
+            this.copyOfPieces[possibleMovesOfClickedPiece.get(move)] = formerPiece;
         }
+
         possibleMovesOfClickedPiece.clear();
         possibleMovesOfClickedPiece.addAll(possibleFutureMoves);
     }
@@ -372,9 +312,26 @@ public class ChessEngine {
         return false;
     }
 
-    public String getNotationOfMove() {
+    public void addRecordOfMoveToNotation() {
+        if (isWhiteTurn) {
+            this.numberOfRound = numberOfRound + 1;
+            if (isCheckMate(this.pieces)) {
+                recordOfGame.setText(getRecordOfWhiteMove() + "#   ");
+            } else if (isKingInCheck(this.pieces, getOpponentPlayer(), getCurrentPlayer())) {
+                recordOfGame.setText(getRecordOfWhiteMove() + "+   ");
+            } else {
+                recordOfGame.setText(getRecordOfWhiteMove() + "   ");
+            }
+        } else {
+            if (isCheckMate(this.pieces)) {
+                recordOfGame.setText(getRecordOfBlackMove() + "# \r\n");
+            } else if (isKingInCheck(this.pieces, getOpponentPlayer(), getCurrentPlayer())) {
+                recordOfGame.setText(getRecordOfBlackMove() + "+ \r\n");
+            } else {
+                recordOfGame.setText(getRecordOfBlackMove() + "\r\n");
+            }
+        }
 
-        return "s";
     }
 
     public String getRowFromIndex(Piece[] pieces, int index) {
@@ -406,5 +363,50 @@ public class ChessEngine {
             default -> "Invalid column";
         };
     }
+
+    public String getRecordOfWhiteMove() {
+        return recordOfGame.getText() + numberOfRound + ". " + "  " + getPieceAtIndex(this.pieces, indexOfClickedField).getNotation() +
+                getColumnFromIndex(this.pieces, indexOfClickedField) + getRowFromIndex(this.pieces, indexOfClickedField);
+    }
+
+    public String getRecordOfBlackMove() {
+        return recordOfGame.getText() + getPieceAtIndex(this.pieces, indexOfClickedField).getNotation() +
+                getColumnFromIndex(this.pieces, indexOfClickedField) + getRowFromIndex(this.pieces, indexOfClickedField);
+    }
+
+    public boolean isCheckMate(Piece[] pieces) {
+        setCopyOfPieces(pieces);
+        List<Integer> opponentFields = getOpponentOccupiedFields(pieces, getOpponentPlayer());
+        List<Integer> possibleMovesOfPiece;
+        List<Integer> sumOfPossibleMoves = new ArrayList<>();
+        boolean isMoveOk = true;
+        for (int i = 0; i < opponentFields.size(); i++) {
+            Piece chosenPiece = pieces[opponentFields.get(i)];
+            possibleMovesOfPiece = getPossibleMoves(pieces, opponentFields.get(i));
+            for (int move = 0; move < possibleMovesOfPiece.size(); move++) {
+                Piece formerPiece = this.copyOfPieces[possibleMovesOfPiece.get(move)];
+                this.copyOfPieces[opponentFields.get(i)] = null;
+                this.copyOfPieces[possibleMovesOfPiece.get(move)] = chosenPiece;
+                if (chosenPiece.getName().equals("o")) {
+                    if (isKingInCheck(this.copyOfPieces, getOpponentPlayer(), getCurrentPlayer())) {
+                        isMoveOk = false;
+                    } else {
+                        isMoveOk = true;
+                    }
+                } else {
+                    if (isKingInCheck(this.copyOfPieces, getOpponentPlayer(), getCurrentPlayer())) {
+                        isMoveOk = false;
+                    }
+                }
+                if (isMoveOk) {
+                    sumOfPossibleMoves.add(possibleMovesOfPiece.get(move));
+                }
+                this.copyOfPieces[opponentFields.get(i)] = chosenPiece;
+                this.copyOfPieces[possibleMovesOfPiece.get(move)] = formerPiece;
+            }
+        }
+        return sumOfPossibleMoves.isEmpty();
+    }
+
 
 }
