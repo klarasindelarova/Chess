@@ -10,7 +10,7 @@ public class Queen extends Piece {
     }
 
     @Override
-    public List<Integer> givePossibleMoves(ChessEngine engine, Piece[] pieces, int index) {
+    public List<Integer> givePossibleMoves(Piece[] pieces, int index) {
         List<Integer> possibleMoves = new ArrayList<>();
         int rowOfPiece = index / 8;
         int columnOfPiece = index % 8;
@@ -34,10 +34,10 @@ public class Queen extends Piece {
                 if (!(isInBounds(rowOfFutureMove, columnOfFutureMove))) {
                     break;
                 }
-                if (!(engine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                if (!(ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
                     possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                 } else {
-                    if (!(engine.getPieceAtIndex(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour))) {
+                    if (!(pieces[getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)].getColour().equals(this.colour))) {
                         possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                         break;
                     } else {

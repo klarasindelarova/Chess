@@ -27,7 +27,7 @@ public abstract class Piece {
         return notation;
     }
 
-    public abstract List<Integer> givePossibleMoves(ChessEngine engine, Piece[] pieces, int index);
+    public abstract List<Integer> givePossibleMoves(Piece[] pieces, int index);
 
     public int getIndexFromRowAndColumn(int row, int column) {
         return 8 * row + column;
@@ -37,11 +37,11 @@ public abstract class Piece {
         return row >= 0 && row <= 7 && column >=0 && column <= 7;
     }
 
-    public void checkFiguresAroundAndAddMovesToList(ChessEngine engine, Piece[] pieces, List<Integer> possibleMoves, int rowOfFutureMove, int columnOfFutureMove) {
-        if (!(engine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+    public void checkFiguresAroundAndAddMovesToList(Piece[] pieces, List<Integer> possibleMoves, int rowOfFutureMove, int columnOfFutureMove) {
+        if (!(ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
             possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
         } else {
-            if (!(engine.getPieceAtIndex(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)).getColour().equals(this.colour))) {
+            if (!(pieces[getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)].getColour().equals(this.colour))) {
                 possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
             }
         }

@@ -5,9 +5,8 @@ import javafx.scene.input.MouseEvent;
 
 public class OnClickHandler implements EventHandler<MouseEvent> {
 
-    private ChessEngine engine;
-    private int index;
-
+    private final ChessEngine engine;
+    private final int index;
 
     public OnClickHandler(ChessEngine engine, int index) {
         this.engine = engine;
@@ -16,9 +15,7 @@ public class OnClickHandler implements EventHandler<MouseEvent> {
 
     @Override
     public void handle(MouseEvent event) {
-        engine.setIndexOfClickedField(index);
-        engine.inspectMove();
-
+        engine.inspectMoveAtIndex(index);
     }
 
 

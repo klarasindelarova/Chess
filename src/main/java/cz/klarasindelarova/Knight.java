@@ -10,7 +10,7 @@ public class Knight extends Piece{
     }
 
     @Override
-    public List<Integer> givePossibleMoves(ChessEngine engine, Piece[] pieces, int index) {
+    public List<Integer> givePossibleMoves(Piece[] pieces, int index) {
         List<Integer> possibleMoves = new ArrayList<>();
         int rowOfPiece = index/8;
         int columnOfPiece = index%8;
@@ -30,7 +30,7 @@ public class Knight extends Piece{
             int columnOfFutureMove = columnOfPiece + direction[1];
 
             if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
-                checkFiguresAroundAndAddMovesToList(engine, pieces, possibleMoves, rowOfFutureMove, columnOfFutureMove);
+                checkFiguresAroundAndAddMovesToList(pieces, possibleMoves, rowOfFutureMove, columnOfFutureMove);
             }
         }
         return possibleMoves;
