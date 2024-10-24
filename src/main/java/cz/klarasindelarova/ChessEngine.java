@@ -17,7 +17,6 @@ public class ChessEngine {
     private int indexOfLastClickedField;
     private Label[] arrayOfLabels;
     private boolean isWhiteTurn;
-    private List<Integer> highlightedFields;
     private Logger logger = LogManager.getLogger(ChessEngine.class);
     private Text recordOfGame;
     private Label currentPlayer;
@@ -47,9 +46,8 @@ public class ChessEngine {
                 List<Integer> updatedPossibleFields = inspectIfMoveCausesCheckAndGivePossibleMoves(this.pieces[indexOfClickedField], possibleFields);
                 this.indexOfLastClickedField = indexOfClickedField;
                 highlightFields(updatedPossibleFields);
-                highlightedFields = updatedPossibleFields;
                 setFieldsActive();
-                setHighlightedFieldsActive(highlightedFields);
+                setHighlightedFieldsActive(updatedPossibleFields);
             } else {
                 setFieldsActive();
             }
