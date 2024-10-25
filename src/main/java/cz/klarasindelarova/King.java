@@ -5,8 +5,6 @@ import java.util.List;
 
 public class King extends Piece {
 
-    private ChessEngine engine;
-
     public King(String colour) {
         super("l", colour, "K");
     }

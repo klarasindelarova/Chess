@@ -46,10 +46,10 @@ public class Pawn extends Piece {
                 }
 
                 columnOfFutureMove = columnOfPiece;
-                if (!(ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                if (!(MoveInspector.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
                     possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                     rowOfFutureMove = rowOfPiece + 2;
-                    if (!(ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                    if (!(MoveInspector.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
                         possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                     }
                 }
@@ -75,10 +75,10 @@ public class Pawn extends Piece {
                 }
 
                 columnOfFutureMove = columnOfPiece;
-                if (!(ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                if (!(MoveInspector.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
                     possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                     rowOfFutureMove = rowOfPiece - 2;
-                    if (!(ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                    if (!(MoveInspector.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
                         possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                     }
                 }
@@ -92,7 +92,7 @@ public class Pawn extends Piece {
 
     public boolean isPossibleToTakePieceInNextMove(Piece[] pieces, int rowOfFutureMove, int columnOfFutureMove) {
         if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
-            if (ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove))) {
+            if (MoveInspector.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove))) {
                 Piece pieceAtIndex = pieces[getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)];
                 if (!(pieceAtIndex.getColour().equals(this.colour)) &&
                         columnOfFutureMove < 8) {
@@ -104,14 +104,14 @@ public class Pawn extends Piece {
     }
 
     public void giveMovesForAnyPositionExceptFirstRow(Piece[] pieces, int[][] directions, int RoP, int CoP,
-                                                      int rowOfFutureMove, int columnOfFutureMove, List<Integer> possMoves ) {
+                                                      int rowOfFutureMove, int columnOfFutureMove, List<Integer> possMoves) {
         boolean firstRound = true;
         for (int[] direction : directions) {
             rowOfFutureMove = RoP + direction[0];
             columnOfFutureMove = CoP + direction[1];
             if (firstRound) {
                 if (isInBounds(rowOfFutureMove, columnOfFutureMove)) {
-                    if (!(ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                    if (!(MoveInspector.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
                         possMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                     }
                 }

@@ -3,7 +3,7 @@ package cz.klarasindelarova;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Knight extends Piece{
+public class Knight extends Piece {
 
     public Knight(String colour) {
         super("m", colour, "N");
@@ -12,9 +12,9 @@ public class Knight extends Piece{
     @Override
     public List<Integer> givePossibleMoves(Piece[] pieces, int index) {
         List<Integer> possibleMoves = new ArrayList<>();
-        int rowOfPiece = index/8;
-        int columnOfPiece = index%8;
-        int [][] directions = {
+        int rowOfPiece = index / 8;
+        int columnOfPiece = index % 8;
+        int[][] directions = {
                 {-2, -1},
                 {-2, +1},
                 {-1, +2},

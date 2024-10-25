@@ -2,7 +2,6 @@ package cz.klarasindelarova;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
-
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -20,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ChessApplication extends Application {
 
-    private Logger logger = LogManager.getLogger(ChessApplication.class);
+    private final Logger logger = LogManager.getLogger(ChessApplication.class);
 
     public void start(Stage stage) {
 
@@ -102,11 +101,9 @@ public class ChessApplication extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
 
-
-        ChessEngine engine = new ChessEngine(notation, currentPlayer);
         Label[] arrayOfLabels = createLabels();
+        ChessEngine engine = new ChessEngine(notation, currentPlayer, arrayOfLabels);
         addLabelsToPane(board, arrayOfLabels, engine);
-        engine.setArrayOfLabels(arrayOfLabels);
         engine.initialSetup();
 
         stage.show();

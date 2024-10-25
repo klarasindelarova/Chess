@@ -11,13 +11,13 @@ public class ChessNotation {
         return this.recordOfGame;
     }
 
-    public void addRecordOfMoveToNotation(Piece movedPiece, int targetIndex, boolean isKingInCheck, boolean isCheckMate, boolean isWhiteTurn) {
-        String recordOfSingleMove = createRecordOfSingleMove(movedPiece, targetIndex, isKingInCheck, isCheckMate, isWhiteTurn);
+    public void addRecordOfMoveToNotation(Piece movedPiece, int targetIndex, boolean isKingInCheck, boolean isCheckMate, Colour currentPlayer) {
+        String recordOfSingleMove = createRecordOfSingleMove(movedPiece, targetIndex, isKingInCheck, isCheckMate, currentPlayer);
         this.recordOfGame = recordOfGame + recordOfSingleMove;
     }
 
-    public String createRecordOfSingleMove(Piece movedPiece, int targetIndex, boolean isKingInCheck, boolean isCheckMate, boolean isWhiteTurn) {
-        if (isWhiteTurn) {
+    public String createRecordOfSingleMove(Piece movedPiece, int targetIndex, boolean isKingInCheck, boolean isCheckMate, Colour currentPlayer) {
+        if (currentPlayer == Colour.WHITE) {
             numberOfRound = numberOfRound + 1;
             if (isCheckMate) {
                 return numberOfRound + ".    " + getRecordOfMove(movedPiece, targetIndex) + "#   ";

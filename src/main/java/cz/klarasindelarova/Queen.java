@@ -34,7 +34,7 @@ public class Queen extends Piece {
                 if (!(isInBounds(rowOfFutureMove, columnOfFutureMove))) {
                     break;
                 }
-                if (!(ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+                if (!(MoveInspector.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
                     possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
                 } else {
                     if (!(pieces[getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)].getColour().equals(this.colour))) {

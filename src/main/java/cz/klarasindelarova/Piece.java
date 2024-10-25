@@ -1,7 +1,7 @@
 package cz.klarasindelarova;
 
 
-import java.util.*;
+import java.util.List;
 
 public abstract class Piece {
 
@@ -34,11 +34,13 @@ public abstract class Piece {
     }
 
     public boolean isInBounds(int row, int column) {
-        return row >= 0 && row <= 7 && column >=0 && column <= 7;
+        return row >= 0 && row <= 7 && column >= 0 && column <= 7;
     }
 
+
+    // TODO metoda by mela vracet int a kazda figura at si to prida do svych possibleMoves
     public void checkFiguresAroundAndAddMovesToList(Piece[] pieces, List<Integer> possibleMoves, int rowOfFutureMove, int columnOfFutureMove) {
-        if (!(ChessEngine.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
+        if (!(MoveInspector.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
             possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
         } else {
             if (!(pieces[getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)].getColour().equals(this.colour))) {

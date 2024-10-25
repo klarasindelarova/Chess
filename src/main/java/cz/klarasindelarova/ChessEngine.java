@@ -12,22 +12,24 @@ import java.util.List;
 
 public class ChessEngine {
 
-    private Piece[] pieces;
+    private final Piece[] pieces;
     private int indexOfClickedField;
     private int indexOfLastClickedField;
-    private Label[] arrayOfLabels;
-    private boolean isWhiteTurn;
-    private Logger logger = LogManager.getLogger(ChessEngine.class);
-    private Text recordOfGame;
-    private Label currentPlayer;
-    private ChessNotation notation;
+    private final Label[] arrayOfLabels;
+    private Colour currentPlayer;
+    private final Logger logger = LogManager.getLogger(ChessEngine.class);
+    private final Text recordOfGame;
+    private final Label currentPlayerLabel;
+    private final ChessNotation notation;
 
-    public ChessEngine(Text recordOfGameTextField, Label currentPlayer) {
+
+    public ChessEngine(Text recordOfGameTextField, Label currentPlayerLabel, Label[] arrayOfLabels) {
         this.pieces = new Piece[64];
-        this.isWhiteTurn = true;
+        this.currentPlayer = Colour.WHITE;
         this.notation = new ChessNotation();
         this.recordOfGame = recordOfGameTextField;
-        this.currentPlayer = currentPlayer;
+        this.currentPlayerLabel = currentPlayerLabel;
+        this.arrayOfLabels = arrayOfLabels;
     }
 
     public void initialSetup() {
@@ -41,13 +43,14 @@ public class ChessEngine {
         setIndexOfClickedField(index);
         if (this.arrayOfLabels[indexOfClickedField].getEffect() == null) {
             eraseHighlightAndDisable();
-            if (isPlayable(this.pieces, indexOfClickedField)) {
-                List<Integer> possibleFields = getPossibleMoves(this.pieces, indexOfClickedField);
-                List<Integer> updatedPossibleFields = inspectIfMoveCausesCheckAndGivePossibleMoves(this.pieces[indexOfClickedField], possibleFields);
+            if (MoveInspector.isPlayable(this.pieces, indexOfClickedField)) {
+                MoveInspector inspector = new MoveInspector(this.pieces, this.indexOfClickedField, this.currentPlayer);
+                List<Integer> possibleMoves = inspector.getPossibleMoves();
+                List<Integer> finalPossibleMoves = inspector.inspectIfMoveCausesCheckAndGivePossibleMoves(this.pieces[indexOfClickedField], possibleMoves);
                 this.indexOfLastClickedField = indexOfClickedField;
-                highlightFields(updatedPossibleFields);
+                highlightFields(finalPossibleMoves);
                 setFieldsActive();
-                setHighlightedFieldsActive(updatedPossibleFields);
+                setHighlightedFieldsActive(finalPossibleMoves);
             } else {
                 setFieldsActive();
             }
@@ -55,87 +58,51 @@ public class ChessEngine {
             eraseHighlightAndDisable();
             Piece movedPiece = movePieceAndGiveMovedPiece(this.pieces, indexOfLastClickedField, indexOfClickedField);
             setPiecesToBoard();
-            notation.addRecordOfMoveToNotation(movedPiece, indexOfClickedField, isKingInCheck(this.pieces, getOpponentPlayer(), getCurrentPlayer()),
-                    isCheckMate(), isWhiteTurn);
+            MoveInspector inspector = new MoveInspector(this.pieces, indexOfClickedField, currentPlayer.opposite());
+            notation.addRecordOfMoveToNotation(movedPiece, indexOfClickedField, inspector.isKingInCheck(),
+                    inspector.isCheckMate(), this.currentPlayer);
             recordOfGame.setText(notation.getRecordOfGame());
-            if (!(isCheckMate())) {
+            if (!(inspector.isCheckMate())) {
                 changeTurn();
-                currentPlayer.setText(getCurrentPlayer());
+                currentPlayerLabel.setText(currentPlayer.getCode());
                 setFieldsActive();
             }
         }
-    }
-
-    public static boolean isPlayable(Piece[] pieces, int index) {
-        return pieces[index] != null;
-    }
-
-    public void setArrayOfLabels(Label[] arrayOfLabels) {
-        this.arrayOfLabels = arrayOfLabels;
     }
 
     public void setIndexOfClickedField(int indexOfClickedField) {
         this.indexOfClickedField = indexOfClickedField;
     }
 
-    private Piece[] createCopyOfPieces() {
-        Piece[] copyOfPieces = new Piece[64];
-        for (int i = 0; i < 64; i++) {
-            copyOfPieces[i] = this.pieces[i];
-        }
-        return copyOfPieces;
-    }
-
-    private String getCurrentPlayer() {
-        if (isWhiteTurn) {
-            return "WHITE";
-        }
-        return "BLACK";
-    }
-
-    private String getOpponentPlayer() {
-        if (isWhiteTurn) {
-            return "BLACK";
-        }
-        return "WHITE";
-    }
-
     private void changeTurn() {
-        isWhiteTurn = !isWhiteTurn;
+        currentPlayer = currentPlayer.opposite();
     }
 
     private void setPiecesToInitialPositions() {
-        this.pieces[0] = new Rook(getOpponentPlayer());
-        this.pieces[1] = new Knight(getOpponentPlayer());
-        this.pieces[2] = new Bishop(getOpponentPlayer());
-        this.pieces[3] = new Queen(getOpponentPlayer());
-        this.pieces[4] = new King(getOpponentPlayer());
-        this.pieces[5] = new Bishop(getOpponentPlayer());
-        this.pieces[6] = new Knight(getOpponentPlayer());
-        this.pieces[7] = new Rook(getOpponentPlayer());
+        this.pieces[0] = new Rook(currentPlayer.opposite().getCode());
+        this.pieces[1] = new Knight(currentPlayer.opposite().getCode());
+        this.pieces[2] = new Bishop(currentPlayer.opposite().getCode());
+        this.pieces[3] = new Queen(currentPlayer.opposite().getCode());
+        this.pieces[4] = new King(currentPlayer.opposite().getCode());
+        this.pieces[5] = new Bishop(currentPlayer.opposite().getCode());
+        this.pieces[6] = new Knight(currentPlayer.opposite().getCode());
+        this.pieces[7] = new Rook(currentPlayer.opposite().getCode());
         for (int b = 8; b < 16; b++) {
-            this.pieces[b] = new Pawn(getOpponentPlayer());
+            this.pieces[b] = new Pawn(currentPlayer.opposite().getCode());
         }
         for (int w = 48; w < 56; w++) {
-            this.pieces[w] = new Pawn(getCurrentPlayer());
+            this.pieces[w] = new Pawn(currentPlayer.getCode());
         }
-        this.pieces[56] = new Rook(getCurrentPlayer());
-        this.pieces[57] = new Knight(getCurrentPlayer());
-        this.pieces[58] = new Bishop(getCurrentPlayer());
-        this.pieces[59] = new Queen(getCurrentPlayer());
-        this.pieces[60] = new King(getCurrentPlayer());
-        this.pieces[61] = new Bishop(getCurrentPlayer());
-        this.pieces[62] = new Knight(getCurrentPlayer());
-        this.pieces[63] = new Rook(getCurrentPlayer());
+        this.pieces[56] = new Rook(currentPlayer.getCode());
+        this.pieces[57] = new Knight(currentPlayer.getCode());
+        this.pieces[58] = new Bishop(currentPlayer.getCode());
+        this.pieces[59] = new Queen(currentPlayer.getCode());
+        this.pieces[60] = new King(currentPlayer.getCode());
+        this.pieces[61] = new Bishop(currentPlayer.getCode());
+        this.pieces[62] = new Knight(currentPlayer.getCode());
+        this.pieces[63] = new Rook(currentPlayer.getCode());
     }
 
-    private List<Integer> getPossibleMoves(Piece[] pieces, int index) {
-        Piece clickedPiece = pieces[index];
-        if (clickedPiece == null) {
-            return new ArrayList<>();
-        }
-        return clickedPiece.givePossibleMoves(pieces, index);
-    }
 
     private Piece movePieceAndGiveMovedPiece(Piece[] pieces, int from, int to) {
         Piece piece = pieces[from];
@@ -191,7 +158,7 @@ public class ChessEngine {
     private List<Integer> getOpponentOccupiedFields(Piece[] pieces, String colour) {
         List<Integer> occupiedFields = new ArrayList<>();
         for (int i = 0; i < 64; i++) {
-            if (isPlayable(pieces, i)) {
+            if (MoveInspector.isPlayable(pieces, i)) {
                 if (pieces[i].getColour().equals(colour)) {
                     occupiedFields.add(i);
                 }
@@ -201,7 +168,7 @@ public class ChessEngine {
     }
 
     private void disableLabelsWithOpponentPieces() {
-        List<Integer> opponentOccupiedLabels = getOpponentOccupiedFields(this.pieces, getOpponentPlayer());
+        List<Integer> opponentOccupiedLabels = getOpponentOccupiedFields(this.pieces, currentPlayer.opposite().getCode());
         for (int i = 0; i < opponentOccupiedLabels.size(); i++) {
             arrayOfLabels[opponentOccupiedLabels.get(i)].setDisable(true);
             arrayOfLabels[opponentOccupiedLabels.get(i)].setOpacity(1);
@@ -213,79 +180,5 @@ public class ChessEngine {
             arrayOfLabels[highlightedFields.get(i)].setDisable(false);
         }
     }
-
-    private int getCurrentIndexOfKing(Piece[] pieces, String colour) {
-        for (int index = 0; index < 64; index++) {
-            Piece inspectedPiece = pieces[index];
-            if (inspectedPiece == null) {
-                continue;
-            }
-            if (inspectedPiece.getColour().equals(colour) && inspectedPiece.getName().equals("l")) {
-                return index;
-            }
-        }
-        throw new IllegalStateException("No field with king found.");
-    }
-
-    private List<Integer> inspectIfMoveCausesCheckAndGivePossibleMoves(Piece clickedPiece, List<Integer> possibleMovesOfClickedPiece) {
-        Piece[] copyOfBoard = createCopyOfPieces();
-        List<Integer> possibleFutureMoves = new ArrayList<>();
-        for (int i = 0; i < possibleMovesOfClickedPiece.size(); i++) {
-            int indexOfTargetField = possibleMovesOfClickedPiece.get(i);
-            Piece pieceAtTargetField = copyOfBoard[indexOfTargetField];
-            movePieceAndGiveMovedPiece(copyOfBoard, indexOfClickedField, indexOfTargetField);
-            if (!isKingInCheck(copyOfBoard, getCurrentPlayer(), getOpponentPlayer())) {
-                possibleFutureMoves.add(indexOfTargetField);
-            }
-            copyOfBoard[indexOfClickedField] = clickedPiece;
-            copyOfBoard[indexOfTargetField] = pieceAtTargetField;
-        }
-        return possibleFutureMoves;
-    }
-
-    private boolean isKingInCheck(Piece[] pieces, String colour, String opponentColour) {
-        for (int i = 0; i < 64; i++) {
-            Piece inspectedPiece = pieces[i];
-            if (inspectedPiece == null) {
-                continue;
-            }
-            if (inspectedPiece.getColour().equals(opponentColour)) {
-                List<Integer> possibleMoves = getPossibleMoves(pieces, i);
-                if (possibleMoves.contains(getCurrentIndexOfKing(pieces, colour))) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isCheckMate() {
-        Piece[] copyOfBoard = createCopyOfPieces();
-        List<Integer> opponentFields = getOpponentOccupiedFields(copyOfBoard, getOpponentPlayer());
-        List<Integer> possibleMovesOfPiece;
-        List<Integer> sumOfPossibleMoves = new ArrayList<>();
-        boolean isMoveOk = true;
-        for (int i = 0; i < opponentFields.size(); i++) {
-            Piece chosenPiece = copyOfBoard[opponentFields.get(i)];
-            possibleMovesOfPiece = getPossibleMoves(copyOfBoard, opponentFields.get(i));
-            for (int move = 0; move < possibleMovesOfPiece.size(); move++) {
-                Piece formerPiece = copyOfBoard[possibleMovesOfPiece.get(move)];
-                copyOfBoard[opponentFields.get(i)] = null;
-                copyOfBoard[possibleMovesOfPiece.get(move)] = chosenPiece;
-                if (isKingInCheck(copyOfBoard, getOpponentPlayer(), getCurrentPlayer())) {
-                    isMoveOk = false;
-                } else {
-                    isMoveOk = true;
-                }
-                if (isMoveOk) {
-                    sumOfPossibleMoves.add(possibleMovesOfPiece.get(move));
-                }
-                copyOfBoard[opponentFields.get(i)] = chosenPiece;
-                copyOfBoard[possibleMovesOfPiece.get(move)] = formerPiece;
-            }
-        }
-        return sumOfPossibleMoves.isEmpty();
-    }
-
 
 }

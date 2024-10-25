@@ -18,6 +18,4 @@ public class OnClickHandler implements EventHandler<MouseEvent> {
         engine.inspectMoveAtIndex(index);
     }
 
-
-
 }
