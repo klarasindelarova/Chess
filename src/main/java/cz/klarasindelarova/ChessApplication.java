@@ -4,10 +4,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -75,6 +72,11 @@ public class ChessApplication extends Application {
         VBox boardWithBars = new VBox();
         boardWithBars.getChildren().addAll(lettersTop, board, lettersBottom);
 
+        Label[] arrayOfLabels = createLabels();
+        ChessEngine engine = new ChessEngine(notation, currentPlayer, arrayOfLabels);
+        addLabelsToPane(board, arrayOfLabels, engine);
+        engine.initialSetup();
+
         rightTextFields.getChildren().addAll(spacing2, turnTitle, currentPlayer, notation);
         rightTextFields.setSpacing(20);
         horizontalLayout.getChildren().addAll(leftBar, boardWithBars, rightBar, spacing1, rightTextFields);
@@ -82,6 +84,7 @@ public class ChessApplication extends Application {
         MenuBar menu = new MenuBar();
         Menu fileMenu = new Menu("File");
         MenuItem newGame = new MenuItem("New Game");
+        newGame.setOnAction(e -> engine.newRound());
         MenuItem saveGame = new MenuItem("Save");
         MenuItem exitGame = new MenuItem("Exit Game");
         exitGame.setOnAction(e -> stage.close());
@@ -100,11 +103,6 @@ public class ChessApplication extends Application {
         stage.setTitle("Chess");
         stage.setScene(scene);
         stage.setResizable(false);
-
-        Label[] arrayOfLabels = createLabels();
-        ChessEngine engine = new ChessEngine(notation, currentPlayer, arrayOfLabels);
-        addLabelsToPane(board, arrayOfLabels, engine);
-        engine.initialSetup();
 
         stage.show();
     }

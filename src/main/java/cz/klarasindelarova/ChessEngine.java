@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ChessEngine {
 
-    private final Piece[] pieces;
+    private Piece[] pieces;
     private int indexOfClickedField;
     private int indexOfLastClickedField;
     private final Label[] arrayOfLabels;
@@ -20,7 +20,7 @@ public class ChessEngine {
     private final Logger logger = LogManager.getLogger(ChessEngine.class);
     private final Text recordOfGame;
     private final Label currentPlayerLabel;
-    private final ChessNotation notation;
+    private ChessNotation notation;
 
 
     public ChessEngine(Text recordOfGameTextField, Label currentPlayerLabel, Label[] arrayOfLabels) {
@@ -32,7 +32,16 @@ public class ChessEngine {
         this.arrayOfLabels = arrayOfLabels;
     }
 
+    public void newRound() {
+        initialSetup();
+        this.currentPlayerLabel.setText(this.currentPlayer.getCode());
+        this.notation = new ChessNotation();
+        this.recordOfGame.setText(null);
+    }
+
     public void initialSetup() {
+        clearBoard();
+        this.currentPlayer = Colour.WHITE;
         setPiecesToInitialPositions();
         setPiecesToBoard();
         setFieldsActive();
@@ -76,6 +85,13 @@ public class ChessEngine {
 
     private void changeTurn() {
         currentPlayer = currentPlayer.opposite();
+    }
+
+    private void clearBoard() {
+        for (Label label : this.arrayOfLabels) {
+            label.setText("");
+        }
+        this.pieces = new Piece[64];
     }
 
     private void setPiecesToInitialPositions() {

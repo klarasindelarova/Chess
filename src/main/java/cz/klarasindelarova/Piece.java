@@ -38,15 +38,16 @@ public abstract class Piece {
     }
 
 
-    // TODO metoda by mela vracet int a kazda figura at si to prida do svych possibleMoves
-    public void checkFiguresAroundAndAddMovesToList(Piece[] pieces, List<Integer> possibleMoves, int rowOfFutureMove, int columnOfFutureMove) {
-        if (!(MoveInspector.isPlayable(pieces, getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)))) {
-            possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
+    public Integer giveIndexOfFieldIfMoveIsOk(Piece[] pieces, int rowOfFutureMove, int columnOfFutureMove) {
+        int indexFromRowAndColumn = getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove);
+        if (!(MoveInspector.isPlayable(pieces, indexFromRowAndColumn))) {
+            return indexFromRowAndColumn;
         } else {
-            if (!(pieces[getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove)].getColour().equals(this.colour))) {
-                possibleMoves.add(getIndexFromRowAndColumn(rowOfFutureMove, columnOfFutureMove));
+            if (!(pieces[indexFromRowAndColumn].getColour().equals(this.colour))) {
+                return indexFromRowAndColumn;
             }
         }
+        return null;
     }
 
 }
