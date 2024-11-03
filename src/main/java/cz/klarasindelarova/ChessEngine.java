@@ -74,9 +74,22 @@ public class ChessEngine {
             if (!(inspector.isCheckMate())) {
                 changeTurn();
                 currentPlayerLabel.setText(currentPlayer.getCode());
-                setFieldsActive();
+                eraseHighlightAndDisable();
+                AIPlayer opponent = new AIPlayer(this.pieces);
+                MoveInspector inspector1 = new MoveInspector(this.pieces, indexOfClickedField, currentPlayer);
+                opponent.makeRandomMove(inspector1);
+                setPiecesToBoard();
+                notation.addRecordOfMoveToNotation(movedPiece, indexOfClickedField, inspector1.isKingInCheck(),
+                        inspector1.isCheckMate(), this.currentPlayer);
+                recordOfGame.setText(notation.getRecordOfGame());
+                if (!(inspector1.isCheckMate())) {
+                    changeTurn();
+                    currentPlayerLabel.setText(currentPlayer.getCode());
+                    setFieldsActive();
+                }
             }
         }
+
     }
 
     public void setIndexOfClickedField(int indexOfClickedField) {
